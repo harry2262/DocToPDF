@@ -70,19 +70,29 @@
 
         // Step 3: Convert the file to PDF
         const conversionResponse = await fetch('http://localhost:3001/convert-to-pdf', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ filePath: uploadData.filePath })
-        });
-        const conversionData = await conversionResponse.json();
-
-        // Display download link for the PDF
-        downloadLink.href = conversionData.pdfPath;
-        downloadSection.style.display = 'block';
-      } catch (error) {
-        alert(`Error processing file ${error}`);
-      }
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ filePath: uploadData.filePath })
     });
+
+    if (!conversionResponse.ok) {
+      throw new Error('Failed to convert file to PDF');
+    }
+
+    // Step 3: Download the file
+    const blob = await conversionResponse.blob();
+    const downloadUrl = URL.createObjectURL(blob);
+    const tempLink = document.createElement('a');
+    tempLink.href = downloadUrl;
+    tempLink.download = 'converted-file.pdf'; // Default file name
+    document.body.appendChild(tempLink);
+    tempLink.click();
+    document.body.removeChild(tempLink);
+    URL.revokeObjectURL(downloadUrl);
+  } catch (error) {
+    alert(`Error processing file: ${error}`);
+  }
+}); 
   </script>
 </body>
 </html>

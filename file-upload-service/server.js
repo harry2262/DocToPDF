@@ -83,7 +83,9 @@ async function convertDocxToPdf(inputFilePath, outputDir) {
     console.error('Error during conversion:', error);
   }
 }
-
+app.get('/',async (req,res)=>{
+  res.sendFile(path.join(__dirname,"index.html"));
+})
 
 app.post('/convert-to-pdf', async (req, res) => {
   const { filePath } = req.body;
@@ -99,7 +101,13 @@ app.post('/convert-to-pdf', async (req, res) => {
       }
     const pdfPath = await convertDocxToPdf(fullPath,uploadDir)
 
-    res.json({ pdfPath });
+    // res.json({ pdfPath });
+    res.download(pdfPath, path.basename(pdfPath), (err) => {
+      if (err) {
+        console.error(err);
+        res.status(500).send('Error downloading the file.');
+      }
+  });
   } catch (err) {
     res.status(500).send({ error: 'Error converting file to PDF' , message: err });
   }
