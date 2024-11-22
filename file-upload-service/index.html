@@ -48,7 +48,7 @@
 
       try {
         // Step 1: Upload the file to the File Upload Service
-        const uploadResponse = await fetch('http://localhost:3001/upload', {
+        const uploadResponse = await fetch('http://13.201.168.54/upload', {
           method: 'POST',
           body: formData
         });
@@ -69,7 +69,7 @@
         // metadataSection.style.display = 'block';
 
         // Step 3: Convert the file to PDF
-        const conversionResponse = await fetch('http://localhost:3001/convert-to-pdf', {
+        const conversionResponse = await fetch('http://13.201.168.54/convert-to-pdf', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ filePath: uploadData.filePath })
