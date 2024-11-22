@@ -70,7 +70,7 @@ function convertFilename(filename) {
 }
 
 async function convertDocxToPdf(inputFilePath, outputDir) {
-  const command = 'libreoffice7.6';
+  const command = 'libreoffice';
   const args = ['--headless', '--convert-to', 'pdf', '--outdir', outputDir, inputFilePath];
   
   try {

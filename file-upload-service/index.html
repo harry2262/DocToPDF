@@ -46,7 +46,7 @@
     const title = document.getElementById('title');
     const subject = document.getElementById('subject');
     const downloadLink = document.getElementById('downloadLink');
-
+    const loadingIndicator = document.getElementById('loading');
     uploadForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       loadingIndicator.style.display = 'block';
@@ -97,6 +97,11 @@
     URL.revokeObjectURL(downloadUrl);
   } catch (error) {
     alert(`Error processing file: ${error}`);
+  
+ }
+	    finally {
+    // Hide the loading indicator
+    loadingIndicator.style.display = 'none';
   }
 }); 
   </script>
