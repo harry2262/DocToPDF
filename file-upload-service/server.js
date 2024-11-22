@@ -59,6 +59,15 @@ function spawnPromise(command, args) {
     });
   });
 }
+function convertFilename(filename) {
+  // Check if the filename ends with ".docx" and replace it with ".pdf"
+  if (filename.endsWith(".docx")) {
+      return filename.slice(0, -5) + ".pdf";
+  }
+  
+  // Return the original filename if it doesn't have ".docx"
+  return filename;
+}
 
 async function convertDocxToPdf(inputFilePath, outputDir) {
   const command = 'libreoffice7.6';
@@ -67,8 +76,9 @@ async function convertDocxToPdf(inputFilePath, outputDir) {
   try {
     const result = await spawnPromise(command, args);
     console.log('Conversion successful:', result);
-    
-    return outputDir;
+    const returnPath = convertFilename(inputFilePath);
+    // console.log(inputFilePath,returnPath)
+    return returnPath;
   } catch (error) {
     console.error('Error during conversion:', error);
   }
@@ -77,18 +87,17 @@ async function convertDocxToPdf(inputFilePath, outputDir) {
 
 app.post('/convert-to-pdf', async (req, res) => {
   const { filePath } = req.body;
-
+  const fullPath = path.join(__dirname,filePath);
   if (!filePath || !fs.existsSync(filePath)) {
     return res.status(400).send({ error: 'Invalid file path' });
   }
-
+   
   try {
     const uploadDir = path.join(__dirname, 'uploads');
     if (!fs.existsSync(uploadDir)) {
         fs.mkdirSync(uploadDir); // Create the directory if it doesn't exist
       }
-      const uniqueFileName = Date.now() + '.pdf';
-    const pdfPath = await convertDocxToPdf(filePath,uploadDir)
+    const pdfPath = await convertDocxToPdf(fullPath,uploadDir)
 
     res.json({ pdfPath });
   } catch (err) {
