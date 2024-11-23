@@ -57,14 +57,14 @@
   
       try {
         // Step 1: Upload the file to the File Upload Service
-        const uploadResponse = await fetch(`http://15.206.195.9/upload`, {
+        const uploadResponse = await fetch(`${baseurl}/upload`, {
           method: 'POST',
           body: formData
         });
         const uploadData = await uploadResponse.json();
   
         // Step 2: Convert the file to PDF
-        const conversionResponse = await fetch(`http://15.206.195.9/convert-to-pdf`, {
+        const conversionResponse = await fetch(`${baseurl}/convert-to-pdf`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ filePath: uploadData.filePath })
