@@ -14,7 +14,8 @@ yarn-error.log
 logs/
 *.log
 *.log.*
-
+*.pdf
+*.docx
 # Operating system files
 .DS_Store   # macOS
 Thumbs.db   # Windows
