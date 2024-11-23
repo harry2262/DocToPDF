@@ -20,12 +20,9 @@ jobs:
         with:
           node-version: 18
 
-      # Install dependencies and test
+      # Install dependencies
       - name: Install dependencies
         run: npm install
-
-      # - name: Run tests
-      #   run: npm test
 
       # Log in to Docker Hub
       - name: Log in to Docker Hub
@@ -33,6 +30,11 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # Clean up old Docker images
+      - name: Remove old Docker images on runner
+        run: |
+          docker images -q harry6262/docx-to-pdf | xargs -r docker rmi -f || true
 
       # Build the Docker image
       - name: Build Docker image
@@ -51,9 +53,15 @@ jobs:
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           port: 22
           script: |
+            # Remove unused Docker images to save space
+            docker image prune -af || true
+            
+            # Pull the latest Docker image
             docker pull harry6262/docx-to-pdf
+            
             # Stop the existing container (if running)
             docker stop docx-to-pdf || true
             docker rm docx-to-pdf || true
+            
             # Run the new container
             docker run -d -p 3001:3001 --name docx-to-pdf harry6262/docx-to-pdf
