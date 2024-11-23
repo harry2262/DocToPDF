@@ -1,109 +1,55 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Word to PDF Converter</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-  <div class="container">
-    <h1 class="text-center mt-5">Word to PDF Converter</h1>
-    <form id="uploadForm" enctype="multipart/form-data">
-      <div class="mb-3">
-        <label for="file" class="form-label">Upload .docx File</label>
-        <input type="file" class="form-control" id="file" name="file" accept=".docx" required>
-      </div>
-      <button type="submit" class="btn btn-primary">Upload</button>
-    </form>
-    <div id="loading" class="text-center mt-3" style="display: none;">
-      <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Converting...</span>
-      </div>
-      <p>Converting your file to PDF...</p>
-    </div>
-    
-    <div id="metadata" class="mt-4" style="display:none;">
-      <h3>File Metadata</h3>
-      <ul>
-        <li><strong>Author:</strong> <span id="author"></span></li>
-        <li><strong>Title:</strong> <span id="title"></span></li>
-        <li><strong>Subject:</strong> <span id="subject"></span></li>
-      </ul>
-    </div>
+<script>
+  const uploadForm = document.getElementById('uploadForm');
+  const metadataSection = document.getElementById('metadata');
+  const downloadSection = document.getElementById('downloadSection');
+  const author = document.getElementById('author');
+  const title = document.getElementById('title');
+  const subject = document.getElementById('subject');
+  const downloadLink = document.getElementById('downloadLink');
+  const loadingIndicator = document.getElementById('loading');
 
-    <div id="downloadSection" class="mt-4" style="display:none;">
-      <h3>Download PDF</h3>
-      <a id="downloadLink" class="btn btn-success" href="" target="_blank">Download PDF</a>
-    </div>
-  </div>
+  // Get the base URL dynamically
+  const baseUrl = window.location.origin;
 
-  <script>
-    const uploadForm = document.getElementById('uploadForm');
-    const metadataSection = document.getElementById('metadata');
-    const downloadSection = document.getElementById('downloadSection');
-    const author = document.getElementById('author');
-    const title = document.getElementById('title');
-    const subject = document.getElementById('subject');
-    const downloadLink = document.getElementById('downloadLink');
-    const loadingIndicator = document.getElementById('loading');
-    uploadForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      loadingIndicator.style.display = 'block';
-      const formData = new FormData(uploadForm);
+  uploadForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    loadingIndicator.style.display = 'block';
+    const formData = new FormData(uploadForm);
 
-      try {
-        // Step 1: Upload the file to the File Upload Service
-        const uploadResponse = await fetch('http://13.201.168.54/upload', {
-          method: 'POST',
-          body: formData
-        });
-        const uploadData = await uploadResponse.json();
+    try {
+      // Step 1: Upload the file to the File Upload Service
+      const uploadResponse = await fetch(`${baseUrl}/upload`, {
+        method: 'POST',
+        body: formData
+      });
+      const uploadData = await uploadResponse.json();
 
-        // Step 2: Extract metadata from the uploaded file
-        // const metadataResponse = await fetch('http://localhost:3002/extract-metadata', {
-        //   method: 'POST',
-        //   headers: { 'Content-Type': 'application/json' },
-        //   body: JSON.stringify({ filePath: uploadData.filePath })
-        // });
-        // const metadata = await metadataResponse.json();
+      // Step 2: Convert the file to PDF
+      const conversionResponse = await fetch(`${baseUrl}/convert-to-pdf`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filePath: uploadData.filePath })
+      });
 
-        // // Display metadata
-        // author.textContent = metadata.author;
-        // title.textContent = metadata.title;
-        // subject.textContent = metadata.subject;
-        // metadataSection.style.display = 'block';
+      if (!conversionResponse.ok) {
+        throw new Error('Failed to convert file to PDF');
+      }
 
-        // Step 3: Convert the file to PDF
-        const conversionResponse = await fetch('http://13.201.168.54/convert-to-pdf', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ filePath: uploadData.filePath })
-    });
-
-    if (!conversionResponse.ok) {
-      throw new Error('Failed to convert file to PDF');
+      // Step 3: Download the file
+      const blob = await conversionResponse.blob();
+      const downloadUrl = URL.createObjectURL(blob);
+      const tempLink = document.createElement('a');
+      tempLink.href = downloadUrl;
+      tempLink.download = 'converted-file.pdf'; // Default file name
+      document.body.appendChild(tempLink);
+      tempLink.click();
+      document.body.removeChild(tempLink);
+      URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      alert(`Error processing file: ${error}`);
+    } finally {
+      // Hide the loading indicator
+      loadingIndicator.style.display = 'none';
     }
-
-    // Step 3: Download the file
-    const blob = await conversionResponse.blob();
-    const downloadUrl = URL.createObjectURL(blob);
-    const tempLink = document.createElement('a');
-    tempLink.href = downloadUrl;
-    tempLink.download = 'converted-file.pdf'; // Default file name
-    document.body.appendChild(tempLink);
-    tempLink.click();
-    document.body.removeChild(tempLink);
-    URL.revokeObjectURL(downloadUrl);
-  } catch (error) {
-    alert(`Error processing file: ${error}`);
-  
- }
-	    finally {
-    // Hide the loading indicator
-    loadingIndicator.style.display = 'none';
-  }
-}); 
-  </script>
-</body>
-</html>
+  });
+</script>
