@@ -36,7 +36,7 @@ jobs:
 
       # Build the Docker image
       - name: Build Docker image
-        run: docker build -t harry6262/rapidfort .
+        run: docker build -t harry6262/docx-to-pdf .
 
       # Push the Docker image to Docker Hub
       - name: Push Docker image
@@ -52,9 +52,9 @@ jobs:
           port: 22
           script: |
             # Pull the latest image
-            docker pull your-dockerhub-username/node-docx-to-pdf
+            docker pull harry6262/docx-to-pdf
             # Stop the existing container (if running)
             docker stop docx-to-pdf || true
             docker rm docx-to-pdf || true
             # Run the new container
-            docker run -d -p 3001:3001 --name docx-to-pdf your-dockerhub-username/node-docx-to-pdf
+            docker run -d -p 3001:3001 --name docx-to-pdf harry6262/node-docx-to-pdf
