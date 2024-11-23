@@ -56,4 +56,4 @@ jobs:
             docker stop docx-to-pdf || true
             docker rm docx-to-pdf || true
             # Run the new container
-            docker run -d -p 3001:3001 --name docx-to-pdf harry6262/node-docx-to-pdf
+            docker run -d -p 3001:3001 --name docx-to-pdf harry6262/docx-to-pdf
