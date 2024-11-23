@@ -51,7 +51,6 @@ jobs:
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           port: 22
           script: |
-            # Pull the latest image
             docker pull harry6262/docx-to-pdf
             # Stop the existing container (if running)
             docker stop docx-to-pdf || true
