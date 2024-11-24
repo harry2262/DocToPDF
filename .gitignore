@@ -43,3 +43,4 @@ coverage/
 # Other
 *.swp      # Swap files (vim, emacs)
 
+test.js

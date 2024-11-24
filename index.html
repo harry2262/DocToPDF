@@ -14,21 +14,25 @@
         <label for="file" class="form-label">Upload .docx File</label>
         <input type="file" class="form-control" id="file" name="file" accept=".docx" required>
       </div>
-      <button type="submit" class="btn btn-primary">Upload</button>
+      <button type="submit" class="btn btn-primary">Convert to PDF</button>
+      <button type="button" class="btn btn-secondary" id="showMetadataButton">Show Metadata</button>
     </form>
+
     <div id="loading" class="text-center mt-3" style="display: none;">
       <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Converting...</span>
+        <span class="visually-hidden">Processing...</span>
       </div>
-      <p>Converting your file to PDF...</p>
+      <p>Processing your file...</p>
     </div>
     
     <div id="metadata" class="mt-4" style="display:none;">
       <h3>File Metadata</h3>
       <ul>
-        <li><strong>Author:</strong> <span id="author"></span></li>
         <li><strong>Title:</strong> <span id="title"></span></li>
+        <li><strong>Creator:</strong> <span id="creator"></span></li>
         <li><strong>Subject:</strong> <span id="subject"></span></li>
+        <li><strong>Created:</strong> <span id="created"></span></li>
+        <li><strong>Modified:</strong> <span id="modified"></span></li>
       </ul>
     </div>
 
@@ -37,34 +41,36 @@
       <a id="downloadLink" class="btn btn-success" href="" target="_blank">Download PDF</a>
     </div>
   </div>
+
   <script>
     const uploadForm = document.getElementById('uploadForm');
+    const showMetadataButton = document.getElementById('showMetadataButton');
     const metadataSection = document.getElementById('metadata');
     const downloadSection = document.getElementById('downloadSection');
-    const author = document.getElementById('author');
     const title = document.getElementById('title');
+    const creator = document.getElementById('creator');
     const subject = document.getElementById('subject');
+    const created = document.getElementById('created');
+    const modified = document.getElementById('modified');
     const downloadLink = document.getElementById('downloadLink');
     const loadingIndicator = document.getElementById('loading');
   
-    // Get the base URL dynamically
-    const baseUrl = window.location.origin;
-  
+    const baseUrl = window.location.origin; // Get the base URL dynamically
+
+    // Handle form submission for PDF conversion
     uploadForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       loadingIndicator.style.display = 'block';
       const formData = new FormData(uploadForm);
   
       try {
-        // Step 1: Upload the file to the File Upload Service
-        const uploadResponse = await fetch(`${baseurl}/upload`, {
+        const uploadResponse = await fetch(`${baseUrl}/upload`, {
           method: 'POST',
           body: formData
         });
         const uploadData = await uploadResponse.json();
-  
-        // Step 2: Convert the file to PDF
-        const conversionResponse = await fetch(`${baseurl}/convert-to-pdf`, {
+
+        const conversionResponse = await fetch(`${baseUrl}/convert-to-pdf`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ filePath: uploadData.filePath })
@@ -74,7 +80,6 @@
           throw new Error('Failed to convert file to PDF');
         }
   
-        // Step 3: Download the file
         const blob = await conversionResponse.blob();
         const downloadUrl = URL.createObjectURL(blob);
         const tempLink = document.createElement('a');
@@ -87,11 +92,48 @@
       } catch (error) {
         alert(`Error processing file: ${error}`);
       } finally {
-        // Hide the loading indicator
+        loadingIndicator.style.display = 'none';
+      }
+    });
+
+    // Handle metadata extraction
+    showMetadataButton.addEventListener('click', async () => {
+      loadingIndicator.style.display = 'block';
+      const formData = new FormData(uploadForm);
+  
+      try {
+        const uploadResponse = await fetch(`${baseUrl}/upload`, {
+          method: 'POST',
+          body: formData
+        });
+        const uploadData = await uploadResponse.json();
+
+        const metadataResponse = await fetch(`${baseUrl}/extract-metadata`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ filePath: uploadData.filePath })
+        });
+
+        if (!metadataResponse.ok) {
+          throw new Error('Failed to extract metadata');
+        }
+
+        const metadata = await metadataResponse.json();
+
+        // Populate metadata fields
+        title.textContent = metadata.title || 'Untitled';
+        creator.textContent = metadata.creator || 'Unknown';
+        subject.textContent = metadata.subject || 'No Subject';
+        created.textContent = metadata.created || 'No Date';
+        modified.textContent = metadata.modified || 'No Date';
+
+        metadataSection.style.display = 'block';
+      } catch (error) {
+        alert(`Error extracting metadata: ${error}`);
+      } finally {
         loadingIndicator.style.display = 'none';
       }
     });
   </script>
-  
 </body>
 </html>

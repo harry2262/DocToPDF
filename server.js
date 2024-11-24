@@ -2,7 +2,8 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-
+const unzipper = require('unzipper');
+const xml2js = require('xml2js');
 const app = express();
 const port = 3001;
 
@@ -19,6 +20,49 @@ const storage = multer.diskStorage({
     cb(null, Date.now() + path.extname(file.originalname)); // Unique filename
   }
 });
+
+
+async function extractMetadata(filePath) {
+  try {
+    const metadata = {};
+
+    // Open the .docx file as a zip archive
+    await fs
+      .createReadStream(filePath)
+      .pipe(unzipper.Parse())
+      .on('entry', async (entry) => {
+        const fileName = entry.path;
+
+        // Look for the `core.xml` file inside `docProps/`
+        if (fileName === 'docProps/core.xml') {
+          const xmlBuffer = await entry.buffer();
+
+          // Parse the XML to extract metadata
+          xml2js.parseString(xmlBuffer, (err, result) => {
+            if (err) {
+              console.error('Error parsing XML:', err);
+            } else {
+              const coreProps = result['cp:coreProperties'];
+              metadata.title = coreProps['dc:title']?.[0] || 'Untitled';
+              metadata.creator = coreProps['dc:creator']?.[0] || 'Unknown';
+              metadata.subject = coreProps['dc:subject']?.[0] || 'No Subject';
+              metadata.created = coreProps['dcterms:created']?.[0]._ || 'Unknown';
+              metadata.modified = coreProps['dcterms:modified']?.[0]._ || 'Unknown';
+
+              console.log('Metadata:', metadata);
+            }
+          });
+        } else {
+          entry.autodrain();
+        }
+      })
+      .promise();
+
+    return metadata;
+  } catch (error) {
+    console.error('Error extracting metadata:', error);
+  }
+}
 
 const upload = multer({ storage: storage });
 
@@ -112,6 +156,17 @@ app.post('/convert-to-pdf', async (req, res) => {
     res.status(500).send({ error: 'Error converting file to PDF' , message: err });
   }
 });
+
+app.post('/extract-metadata',async (req,res)=>{
+
+  try{
+  const {filePath} = req.body;
+  const metadata = await extractMetadata(filePath);
+  res.json(metadata);}
+  catch (err) {
+    res.status(500).send({ error: 'Error getting metadata' , message: err });
+  }
+})
 
 app.listen(port, () => {
   console.log(`Conversion Service running at http://localhost:${port}`);
