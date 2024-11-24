@@ -17,7 +17,6 @@ This project is a **Word to PDF Conversion Web Application** that allows users t
 
 ### 2. Metadata Extraction:
 - Extract metadata (e.g., author, title, subject) from `.docx` files.
-- Retrieve raw text content using the **Mammoth** library.
 
 ---
 
@@ -26,10 +25,6 @@ This project is a **Word to PDF Conversion Web Application** that allows users t
 ```
 /
 ├── .github/workflows/ci-cd.yml  # GitHub Actions workflow for CI/CD
-├── metadata-extraction-service/ # Service for extracting metadata from .docx
-│   ├── server.js
-│   ├── package.json
-│   └── package-lock.json
 ├── uploads/                     # Directory for storing uploaded files
 ├── .dockerignore                # Docker ignore file
 ├── .gitignore                   # Git ignore file
@@ -60,25 +55,16 @@ This project is a **Word to PDF Conversion Web Application** that allows users t
 2. Install dependencies:
    ```bash
    npm install
-   cd metadata-extraction-service
-   npm install
-   cd ..
    ```
 
 3. Start the services:
    - Conversion Service:
      ```bash
      node server.js
-     ```
-   - Metadata Extraction Service:
-     ```bash
-     cd metadata-extraction-service
-     node server.js
-     ```
+    
 
 4. Access the application:
    - Open [http://localhost:3001](http://localhost:3001) for the main application.
-   - Metadata extraction is available at [http://localhost:3002](http://localhost:3002).
 
 ---
 
@@ -108,7 +94,6 @@ This project is a **Word to PDF Conversion Web Application** that allows users t
       "title": "Document Title",
       "subject": "Document Subject"
     },
-    "rawText": "Content of the document"
   }
   ```
 
@@ -123,7 +108,7 @@ This project is a **Word to PDF Conversion Web Application** that allows users t
 
 2. Run the container:
    ```bash
-   docker run -p 3001:3001 -p 3002:3002 word-to-pdf
+   docker run -p 3001:3001 word-to-pdf
    ```
 
 3. Access the services as described in the Installation section.
@@ -149,7 +134,6 @@ This project is a **Word to PDF Conversion Web Application** that allows users t
 - **Node.js** with **Express.js** framework.
 - **Multer** for handling file uploads.
 - **LibreOffice** for `.docx` to `.pdf` conversion.
-- **Mammoth** for extracting raw text.
 
 
 
@@ -158,5 +142,3 @@ This project is a **Word to PDF Conversion Web Application** that allows users t
 This project is licensed under the **MIT License**.
 
 ---
-
-Let me know if further refinements are needed!
