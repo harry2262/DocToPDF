@@ -1,6 +1,6 @@
 # Use the official Node.js image as the base
 FROM node:18
-RUN apt-get update && apt-get install -y libreoffice-writer
+RUN apt-get update && apt-get install -y libreoffice-core libreoffice-writer
 # Set the working directory
 WORKDIR /usr/src/app
 
